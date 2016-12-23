@@ -84,7 +84,6 @@
 #include <mach/msm_serial_hs.h>
 #include <sound/cs8427.h>
 #include <media/gpio-ir-recv.h>
-#include <linux/fmem.h>
 #include <mach/msm_pcie.h>
 #include <mach/restart.h>
 #include <mach/msm_iomap.h>
@@ -530,9 +529,6 @@ static struct platform_device battery_bcl_device = {
 	};
 #endif
 
-struct fmem_platform_data apq8064_fmem_pdata = {
-};
-
 static struct memtype_reserve apq8064_reserve_table[] __initdata = {
 	[MEMTYPE_SMI] = {
 	},
@@ -593,15 +589,11 @@ static int apq8064_paddr_to_memtype(unsigned int paddr)
 	return MEMTYPE_EBI1;
 }
 
-#define FMEM_ENABLED 0
-
 #ifdef CONFIG_ION_MSM
 #ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
 static struct ion_cp_heap_pdata cp_mm_apq8064_ion_pdata = {
 	.permission_type = IPT_TYPE_MM_CARVEOUT,
 	.align = PAGE_SIZE,
-	.reusable = FMEM_ENABLED,
-	.mem_is_fmem = FMEM_ENABLED,
 	.fixed_position = FIXED_MIDDLE,
 	.is_cma = 0,
 	.no_nonsecure_alloc = 1,
@@ -610,8 +602,6 @@ static struct ion_cp_heap_pdata cp_mm_apq8064_ion_pdata = {
 static struct ion_cp_heap_pdata cp_mfc_apq8064_ion_pdata = {
 	.permission_type = IPT_TYPE_MFC_SHAREDMEM,
 	.align = PAGE_SIZE,
-	.reusable = 0,
-	.mem_is_fmem = FMEM_ENABLED,
 	.fixed_position = FIXED_HIGH,
 	.no_nonsecure_alloc = 1,
 };
@@ -619,13 +609,11 @@ static struct ion_cp_heap_pdata cp_mfc_apq8064_ion_pdata = {
 static struct ion_co_heap_pdata co_apq8064_ion_pdata = {
 	.adjacent_mem_id = INVALID_HEAP_ID,
 	.align = PAGE_SIZE,
-	.mem_is_fmem = 0,
 };
 
 static struct ion_co_heap_pdata fw_co_apq8064_ion_pdata = {
 	.adjacent_mem_id = ION_CP_MM_HEAP_ID,
 	.align = SZ_128K,
-	.mem_is_fmem = FMEM_ENABLED,
 	.fixed_position = FIXED_LOW,
 };
 #endif
@@ -746,12 +734,6 @@ static struct platform_device apq8064_ion_dev = {
 	.dev = { .platform_data = &apq8064_ion_pdata },
 };
 #endif
-
-static struct platform_device apq8064_fmem_device = {
-	.name = "fmem",
-	.id = 1,
-	.dev = { .platform_data = &apq8064_fmem_pdata },
-};
 
 static void __init reserve_mem_for_ion(enum ion_memory_types mem_type,
 				      unsigned long size)
@@ -3925,7 +3907,6 @@ static struct platform_device *common_devices[] __initdata = {
 	&apq8064_device_qup_spi_gsbi5,
 #endif	
 	&msm_device_iris_fm,
-	&apq8064_fmem_device,
 #ifdef CONFIG_ANDROID_PMEM
 #ifndef CONFIG_MSM_MULTIMEDIA_USE_ION
 	&apq8064_android_pmem_device,
